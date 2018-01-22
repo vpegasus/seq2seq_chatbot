@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 import pickle
 
-DIR = '/home/prince/PycharmProjects/lc222seq2seq/data/dataset-cornell-length10-filter1-vocabSize40000.pkl'
+DIR = 'data/dataset-cornell-length10-filter1-vocabSize40000.pkl'
 
 
 def data(DIR, epochs, batch_size):
