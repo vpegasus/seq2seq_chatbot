@@ -102,7 +102,14 @@ def ids2sentence(predict_ids, beam_width):
         predict_seq = [id2word[idx] for idx in predict_ids[0, :, i]]
         answers.append(" ".join(predict_seq))
     final = answers[random.choice(range(beam_width))]
-    print(final)
+    sen = ''
+    for i in final:
+        if i not in ['?','!','.']:
+            sen +=i
+        else:
+            break
+
+    print('ibot: ',sen)
 
 
 if __name__ == '__main__':
