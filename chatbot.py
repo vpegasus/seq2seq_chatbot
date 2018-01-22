@@ -19,6 +19,10 @@ word2id, id2word, _, _, _, _ = data(DIR, 1, 1)
 
 
 def chatbot():
+    """
+    you can use this to chat with your own chat bot
+    :return:
+    """
     questionholder = tf.placeholder(shape=[None, None], dtype=tf.int32)
     quelengthholder = tf.placeholder(shape=[None], dtype=tf.int32)
     params = parameters()
@@ -56,10 +60,16 @@ def chatbot():
             questionbatch, question_length = sentence2ids(question)
             answer_ids = sess.run(predict_ids, feed_dict={questionholder: questionbatch,
                                                           quelengthholder: question_length})
-            answer = ids2sentence(answer_ids,model_param_dict['beam_size'])
+            answer = ids2sentence(answer_ids, model_param_dict['beam_size'])
 
 
 def sentence2ids(question):
+    """
+    used to convert sentence that is inputed by user to id list of words in sentence.
+
+    :param question:
+    :return:
+    """
     ids = []
 
     if question == '':
@@ -69,22 +79,31 @@ def sentence2ids(question):
         return 'sorry, I\'m still a baby, couldn\'t understand that long sentence. =^_^='
 
     for word in question:
-        ids.append(word2id.get(word, 3))  # 3 is the id of 'unknown'
-    ids_length = len(ids) if len(ids)<=10 else 10
-    if len(ids)>10:
+        ids.append(word2id.get(word, 3))  # 3 is the id of 'unknown' token
+    ids_length = len(ids) if len(ids) <= 10 else 10
+    if len(ids) > 10:
         ids = ids[:10]
     else:
-        ids = ids+[0]*(10-len(ids))
+        ids = ids + [0] * (10 - len(ids))
     return [ids], [ids_length]
 
 
 def ids2sentence(predict_ids, beam_width):
+    """
+    convert ids output by chatbot into words and connect to make a complete sentence.
+
+    :param predict_ids:
+    :param beam_width:
+    :return:
+    """
+
     answers = []
     for i in range(beam_width):
-        predict_seq = [id2word[idx] for idx in predict_ids[0,:,i]]
+        predict_seq = [id2word[idx] for idx in predict_ids[0, :, i]]
         answers.append(" ".join(predict_seq))
     final = answers[random.choice(range(beam_width))]
     print(final)
+
 
 if __name__ == '__main__':
     chatbot()

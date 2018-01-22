@@ -15,7 +15,13 @@ from seq2seq import Seq2Seq
 from data_process import data, DIR
 import math
 
+
 def parameters():
+    """
+    a wrapper for Config parser func
+
+    :return: config parser
+    """
     cf = ConfigParser()
     cf.read('config.ini')
     return cf
@@ -23,6 +29,8 @@ def parameters():
 
 def training():
     params = parameters()
+
+    # mode parameters dict
     model_param_dict = {'num_units': int(params.get('modelparam', 'num_units')),
                         'num_layers': int(params.get('modelparam', 'num_layers')),
                         'vocab_size': int(params.get('modelparam', 'vocab_size')),
@@ -34,6 +42,7 @@ def training():
                         'end_token_idx': int(params.get('modelparam', 'end_token_idx')),
                         'max_gradient_norm': float(params.get('modelparam', 'max_gradient_norm'))}
 
+    # as for the comments for below parameters, please find in config.ini
     batch_size = int(params.get('trainparam', 'batch_size'))
     learning_rate = float(params.get('trainparam', 'learning_rate'))
     keep_prob = float(params.get('trainparam', 'keep_prob'))
@@ -47,8 +56,10 @@ def training():
                                    batch_size, keep_prob)
     train_op, loss, summary_merge, predicts = seq2seq.train(decode_outputs, answerbatch, alengthbatch, learning_rate)
 
+    # for save and restore model
     ckpt = tf.train.get_checkpoint_state(modelsaved_dir)
     saver = tf.train.Saver()
+
     with tf.Session() as sess:
         if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
             print('Reloading model parameters..')
@@ -65,17 +76,16 @@ def training():
                 # temploss should not be named as loss, as the name has been used in the model, or, will raise error:
                 # eg: 'Fetch argument 10.112038 has invalid type <class 'numpy.float32'>, must be a string or Tensor.
                 # (Can not convert a float32 into a Tensor or Operation.)'
-                print('run step: ', step,end='\r')
+                print('run step: ', step, end='\r')
                 if step % int(params.get('trainparam', 'steps_per_checkpoint')) == 0:
                     perplexity = math.exp(float(temploss)) if temploss < 300 else float('inf')
-                    print('save at step: ', step,'perplexity: ',perplexity)
+                    print('save at step: ', step, 'perplexity: ', perplexity)
                     summary_writer.add_summary(tempsummary, step)
                     checkpoint_path = os.path.join(modelsaved_dir, savedname)
                     saver.save(sess, checkpoint_path, global_step=step)
-            except tf.errors.OutOfRangeError:
+            except:
                 print('done')
                 break
-
 
 
 if __name__ == '__main__':
